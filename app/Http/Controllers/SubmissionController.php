@@ -15,6 +15,10 @@ class SubmissionController
             'submission' => 'required|string|min:1|max:255'
         ]);
 
+        if ($request->user()->getKey() === $bounty->getAttribute('user_id')) {
+            return response()->json(['error' => "You cannot submit to your own bounty."], 400);
+        }
+
         if (
             $bounty->submissions()->whereRaw('LOWER(submission) = ?', [
                 Str::of($validated['submission'])->lower()
