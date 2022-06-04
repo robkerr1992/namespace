@@ -20,14 +20,12 @@
 
 <script>
 import BreezeButton from '@/Components/Button.vue';
-import BreezeCheckbox from '@/Components/Checkbox.vue';
 import BreezeGuestLayout from '@/Layouts/Guest.vue';
-import BreezeInput from '@/Components/Input.vue';
-import BreezeLabel from '@/Components/Label.vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue';
-import {Head, Link, useForm} from '@inertiajs/inertia-vue3';
+import {Head, useForm} from '@inertiajs/inertia-vue3';
 import { ethers } from 'ethers';
 import axios from 'axios';
+import detectEthereumProvider from '@metamask/detect-provider';
 
 export default {
     name: 'Login',
@@ -35,7 +33,6 @@ export default {
         BreezeGuestLayout,
         BreezeButton,
         Head,
-        Link,
         BreezeValidationErrors
     },
     props: {
@@ -48,12 +45,19 @@ export default {
     },
     methods: {
         async web3Login() {
-            if (!window.ethereum) {
+            const ethereum = await detectEthereumProvider();
+
+            if (!ethereum) {
                 alert('MetaMask not detected. Please install MetaMask first.');
                 return;
             }
 
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            if (ethereum !== window.ethereum) {
+                alert('You may have multiple wallets enabled. Please choose one!');
+                return;
+            }
+
+            const provider = new ethers.providers.Web3Provider(ethereum);
             await provider.send("eth_requestAccounts", []);
 
             this.loading = true;
