@@ -28,4 +28,13 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/test', [\App\Http\Controllers\TestController::class, 'index']);
+
+Route::get('/bounty', [\App\Http\Controllers\BountyController::class, 'index']);
+Route::post('/bounty', [\App\Http\Controllers\BountyController::class, 'store']);
+Route::get('/bounty/create', [\App\Http\Controllers\BountyController::class, 'create']);
+Route::get('/bounty/{bounty}', [\App\Http\Controllers\BountyController::class, 'show']);
+Route::post('/submission/{bounty}', [\App\Http\Controllers\SubmissionController::class, 'store']);
+Route::post('/complete-bounty/{bounty}/{submission}', [\App\Http\Controllers\PickBountyWinnerController::class, '__invoke']);
+
 require __DIR__.'/auth.php';
