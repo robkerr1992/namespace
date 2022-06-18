@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('mapping_key')->comment('mapping key to the corresponding bounty in smart contract');
             $table->string('description');
+            $table->string('value')->comment('value of bounty in wei');
+            $table->string('deadline')->comment('submission deadline in seconds');
             $table->foreignIdFor(\App\Models\User::class)->constrained();
             $table->timestamps();
         });

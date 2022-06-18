@@ -79,6 +79,7 @@ contract Namespace is PullPaymentUpgradeable, OwnableUpgradeable {
     ) external {
         Bounty storage bounty = bounties[bountyId];
 
+        require(_winner != address(0), "You must declare a winner!");
         require(msg.sender == bounty.creator, "Only the creator may declare a winner!");
         require(_winner != bounty.creator, "You can't win your own bounty.");
         require(block.timestamp > bounty.submissionDeadline, "Submission deadline hasn't been reached!");
@@ -97,6 +98,7 @@ contract Namespace is PullPaymentUpgradeable, OwnableUpgradeable {
     ) external onlyOwner {
         Bounty storage bounty = bounties[bountyId];
 
+        require(_winner != address(0), "You must declare a winner!");
         require(bounty.winner == address(0), "Winner already declared.");
         require(block.timestamp > bounty.submissionDeadline + 7 days, "Creator has one week to pick a winning submission.");
 

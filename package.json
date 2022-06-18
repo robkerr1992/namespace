@@ -31,6 +31,7 @@
         "vue-loader": "^17.0.0"
     },
     "dependencies": {
+        "@headlessui/vue": "^1.6.4",
         "@heroicons/vue": "^1.0.6",
         "@metamask/detect-provider": "^1.2.0",
         "@openzeppelin/contracts-upgradeable": "^4.6.0",

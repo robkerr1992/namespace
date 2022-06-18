@@ -17,16 +17,19 @@ class LoginUsingWeb3
     public function __invoke(Request $request): RedirectResponse
     {
         if (! $this->authenticate($request)) {
-            throw ValidationException::withMessages([
-                'signature' => 'Invalid signature.'
-            ]);
+            return back()->with(
+                [ 'error' => 'Invalid signature.']
+            );
+//            throw ValidationException::withMessages([
+//                'signature' => 'Invalid signature.'
+//            ]);
         }
 
         Auth::login(User::firstOrCreate([
             'eth_address' => $request->address
         ]));
 
-        return Redirect::route('dashboard');
+        return Redirect::route('dashboard')->with('success', 'Login Successful. Welcome!');
     }
 
     protected function authenticate(Request $request): bool

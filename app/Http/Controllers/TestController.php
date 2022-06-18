@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class TestController
+class TestController extends Controller
 {
     public function index(): Response
     {

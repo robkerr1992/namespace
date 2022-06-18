@@ -10,22 +10,16 @@ use Inertia\Response;
 
 class BountyController extends Controller
 {
-    public function index(): Response
-    {
-        return Inertia::render('Bounty/Index', [
-            'active_bounties' => Bounty::active()->withCount('submissions')->get(),
-            'completed_bounties' => Bounty::completed()->withCount('submissions')->get()
-        ]);
-    }
-
     public function show(Bounty $bounty): Response
     {
-        $bounty->load('submissions');
+        $bounty->load('submissions', 'poster');
+        $submissions = $bounty->submissions()->with('submitter')->orderBy('won_at', 'desc')->get();
+        $winningSubmission = $bounty->winningSubmission()->with('submitter')->first();
 
         return Inertia::render('Bounty/Show', [
             'bounty' => $bounty,
-            'submissions' => $bounty->submissions()->get(),
-            'winning_submission' => $bounty->winningSubmission()->first()
+            'submissions' => $submissions->isEmpty() ? null : $submissions,
+            'winningSubmission' => $winningSubmission
         ]);
     }
 
@@ -38,15 +32,19 @@ class BountyController extends Controller
     {
         $validated = $request->validate([
             'mapping_key' => 'required|string',
+            'value' => 'required|string',
             'description' => 'required|string',
+            'deadline' => 'required|string',
         ]);
 
         $bounty = Bounty::create([
             'user_id' => $request->user()->getKey(),
             'mapping_key' => $validated['mapping_key'],
-            'description' => $validated['description']
+            'description' => $validated['description'],
+            'value' => $validated['value'],
+            'deadline' => $validated['deadline'],
         ]);
 
-        return redirect()->to('/bounty/'.$bounty->getKey());
+        return redirect()->to('/bounty/'.$bounty->getKey())->with('success', 'Bounty Created Successfully!');
     }
 }

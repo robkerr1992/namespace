@@ -21,26 +21,26 @@
 </template>
 
 <script>
-import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
-import {ethers} from "ethers";
-import Abi from '@/artifacts/hardhat/contracts/Test.sol/Test.json';
-
-
-export default {
-    name: "Test",
-    components: {
-        BreezeAuthenticatedLayout
-    },
-    async created() {
-        const contract = new ethers.Contract(
-            process.env.MIX_CONTRACT_ADDRESS,
-            Abi.abi,
-            new ethers.providers.Web3Provider(window.ethereum).getSigner()
-        );
-
-        console.log((await contract.total()).toString());
-    }
-}
+// import BreezeAuthenticatedLayout from '@/Layouts/Authenticated.vue';
+// import {ethers} from "ethers";
+// import Abi from '@/artifacts/hardhat/contracts/Test.sol/Test.json';
+//
+//
+// export default {
+//     name: "Test",
+//     components: {
+//         BreezeAuthenticatedLayout
+//     },
+//     async created() {
+//         const contract = new ethers.Contract(
+//             process.env.MIX_CONTRACT_ADDRESS,
+//             Abi.abi,
+//             new ethers.providers.Web3Provider(window.ethereum).getSigner()
+//         );
+//
+//         console.log((await contract.total()).toString());
+//     }
+// }
 </script>
 
 <style scoped>

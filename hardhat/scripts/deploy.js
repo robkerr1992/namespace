@@ -1,12 +1,12 @@
-const { ethers } = require("hardhat");
+const {ethers, upgrades} = require("hardhat");
 
 async function main () {
-    const Test = await ethers.getContractFactory('Test');
-    const test = await Test.deploy(222);
-    await test.deployed();
+    const Namespace = await ethers.getContractFactory('Namespace');
+    const namespace = await upgrades.deployProxy(Namespace);
+    await namespace.deployed();
 
-    console.log(await test.total());
-    console.log(test.address);
+    console.log(await namespace.owner());
+    console.log(namespace.address);
 }
 
 main()

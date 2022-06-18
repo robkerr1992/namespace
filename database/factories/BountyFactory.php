@@ -20,6 +20,8 @@ class BountyFactory extends Factory
         return [
             'mapping_key' => $this->faker->word,
             'description' => $this->faker->words(10, true),
+            'value' => $this->faker->randomNumber(9) . $this->faker->randomNumber(9),
+            'deadline' => \Carbon\Carbon::now()->addWeeks(2)->timestamp,
             'user_id' => User::factory()
         ];
     }

@@ -21,10 +21,8 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 module.exports = {
   solidity: "0.8.4",
-    // defaultNetwork: "rinkeby",
+    defaultNetwork: "rinkeby",
     networks: {
-        hardhat: {
-        },
         rinkeby: {
             url: process.env.MIX_PROVIDER_URL,
             accounts: [process.env.MIX_PRIVATE_KEY]
