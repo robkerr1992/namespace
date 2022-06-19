@@ -49,4 +49,9 @@ class Bounty extends Model
     {
         return \Carbon\Carbon::now()->timestamp > $this->getAttribute('deadline');
     }
+
+    public function claimed(): bool
+    {
+        return $this->getAttribute('claimed');
+    }
 }

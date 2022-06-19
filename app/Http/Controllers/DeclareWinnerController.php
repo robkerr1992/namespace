@@ -25,7 +25,7 @@ class DeclareWinnerController extends Controller
         }
 
         if (!$bounty->deadlineHasPassed()) {
-            return redirect()->back()->with('error', 'This bounty is still accepting submissions!');
+            return redirect()->back()->with('error', 'This bounty is still accepting submissions.');
         }
 
         $submission->update(['won_at' => now()]);

@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/bounty/create', [\App\Http\Controllers\BountyController::class, 'create'])->name('bounty.create');
     Route::get('/bounty/active', [\App\Http\Controllers\ActiveBountyController::class, '__invoke'])->name('bounty.active');
     Route::get('/bounty/completed', [\App\Http\Controllers\CompletedBountyController::class, '__invoke'])->name('bounty.completed');
+    Route::post('/claim-bounty/{bounty}', [\App\Http\Controllers\ClaimBountyController::class, '__invoke'])->name('claim-bounty');
     Route::get('/bounty/{bounty}', [\App\Http\Controllers\BountyController::class, 'show'])->name('bounty.show');
     Route::post('/submission/{bounty}', [\App\Http\Controllers\SubmissionController::class, 'store'])->name('submission.store');
     Route::post('/declare-winner/{bounty}/{submission}', [\App\Http\Controllers\DeclareWinnerController::class, '__invoke'])->name('declare-winner');

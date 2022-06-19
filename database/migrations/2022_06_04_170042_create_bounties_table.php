@@ -15,11 +15,12 @@ return new class extends Migration
     {
         Schema::create('bounties', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(\App\Models\User::class)->constrained();
             $table->string('mapping_key')->comment('mapping key to the corresponding bounty in smart contract');
             $table->string('description');
             $table->string('value')->comment('value of bounty in wei');
             $table->string('deadline')->comment('submission deadline in seconds');
-            $table->foreignIdFor(\App\Models\User::class)->constrained();
+            $table->boolean('claimed')->default(false);
             $table->timestamps();
         });
     }

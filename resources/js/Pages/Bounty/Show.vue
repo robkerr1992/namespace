@@ -12,7 +12,16 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-5 sm:px-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ formatEther(bounty.value) }} ETH</h3>
+                        <div class="flex justify-between">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">{{ formatEther(bounty.value) }} ETH</h3>
+                            <BreezeButton
+                                v-if="!bounty.claimed && winningSubmission && winningSubmission.submitter.id === $page.props.auth.user.id"
+                                class="ml-4"
+                                @click="claimBounty"
+                                :class="{ 'opacity-25': awaitingTxResponse }"
+                                :disabled="awaitingTxResponse"
+                            >Claim Bounty</BreezeButton>
+                        </div>
                         <p v-if="acceptingSubmissions" class="mt-1 max-w-2xl text-sm text-gray-500">Submissions accepted for next <span class="text-red-400">{{ deadline() }}</span></p>
                     </div>
                     <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
@@ -24,7 +33,7 @@
                                 <dt class="text-sm font-medium text-gray-500">Description</dt>
                                 <dd class="mt-1 text-sm text-gray-900">{{ bounty.description }}</dd>
                             </div>
-                            <div v-if="acceptingSubmissions" class="sm:col-span-2">
+                            <div v-if="acceptingSubmissions && bounty.user_id !== $page.props.auth.user.id" class="sm:col-span-2">
                                 <dt class="text-sm font-medium text-gray-500">Add Submission</dt>
                                 <BreezeValidationErrors class="mb-4"/>
 
@@ -48,11 +57,13 @@
                                             <div class="w-0 flex-1 flex items-center">
                                                 <StarIcon v-if="submission.won_at" class="flex-shrink-0 h-5 w-5 text-yellow-500" aria-hidden="true" />
                                                 <DocumentTextIcon v-else class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
-                                                <span class="ml-2 flex-1 w-0"> {{ submission.submission }} </span>
+                                                <button type="button" v-if="canDeclareWinner" @click="declareWinner(submission.id)">
+                                                    <span class="ml-2 flex-1 w-0"> {{ submission.submission }} </span>
+                                                </button>
+                                                <span v-else class="ml-2 flex-1 w-0"> {{ submission.submission }} </span>
                                             </div>
                                             <div class="ml-4 flex-shrink-0">
-                                                <button type="button" v-if="canDeclareWinner" @click="declareWinner(submission.id)" class="font-medium text-indigo-600 hover:text-indigo-500"> {{ submission.submitter.eth_address }} </button>
-                                                <a v-else class="font-medium text-indigo-600 hover:text-indigo-500"> {{ submission.submitter.eth_address }} </a>
+                                                <a class="font-medium text-indigo-600 hover:text-indigo-500 invisible md:visible"> {{ submission.submitter.eth_address }} </a>
                                             </div>
                                         </li>
                                     </ul>
@@ -143,7 +154,7 @@ export default {
             }),
             open: false,
             pickedSubmission: null,
-            awaitingTxResponse: false
+            awaitingTxResponse: false,
         }
     },
     computed: {
@@ -190,6 +201,23 @@ export default {
             }
             this.open = false;
             this.awaitingTxResponse = false;
+        },
+        async claimBounty() {
+            console.log('claiming bounty');
+            this.awaitingTxResponse = true;
+
+            try {
+                const address = await provider.getSigner().getAddress();
+                const tx = await contract.withdrawPayments(address);
+                const txReceipt = await tx.wait();
+
+                this.$inertia.post(this.route('claim-bounty', [this.bounty.id]));
+            } catch (err) {
+                console.log(err);
+            }
+
+            this.awaitingTxResponse = false;
+
         }
     }
 }
