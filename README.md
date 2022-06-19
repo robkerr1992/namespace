@@ -1,15 +1,9 @@
-# Basic Sample Hardhat Project
+# Namespace v1
+### A place where you can put up a bounty to get a name for your project, product, or memecoin!
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+Heres how it works:
+- Provide a description of the project you want named
+- Put up a bounty of at least .01 Ether
+- Users will submit name ideas for your project
+- At the end of the submission period you will decide the winner
+- The winner will be allowed to withdraw their prize from the contract
