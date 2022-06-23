@@ -17,7 +17,7 @@
                             <BreezeButton
                                 v-if="!bounty.claimed && winningSubmission && winningSubmission.submitter.id === $page.props.auth.user.id"
                                 class="ml-4"
-                                @click="claimBounty"
+                                @click="claimOpened = true"
                                 :class="{ 'opacity-25': awaitingTxResponse }"
                                 :disabled="awaitingTxResponse"
                             >Claim Bounty</BreezeButton>
@@ -58,12 +58,12 @@
                                                 <StarIcon v-if="submission.won_at" class="flex-shrink-0 h-5 w-5 text-yellow-500" aria-hidden="true" />
                                                 <DocumentTextIcon v-else class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
                                                 <button type="button" v-if="canDeclareWinner" @click="declareWinner(submission.id)">
-                                                    <span class="ml-2 flex-1 w-0"> {{ submission.submission }} </span>
+                                                    <span class="ml-2 flex-1 w-0 hover:text-red-500"> {{ submission.submission }} </span>
                                                 </button>
                                                 <span v-else class="ml-2 flex-1 w-0"> {{ submission.submission }} </span>
                                             </div>
                                             <div class="ml-4 flex-shrink-0">
-                                                <a class="font-medium text-indigo-600 hover:text-indigo-500 invisible md:visible"> {{ submission.submitter.eth_address }} </a>
+                                                <a class="font-medium text-indigo-600 invisible md:visible"> {{ submission.submitter.eth_address }} </a>
                                             </div>
                                         </li>
                                     </ul>
@@ -75,39 +75,37 @@
                 </div>
             </div>
         </div>
-
-        <TransitionRoot as="template" :show="open">
-            <Dialog as="div" class="relative z-10" @close="open = false">
-                <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-                </TransitionChild>
-
-                <div class="fixed z-10 inset-0 overflow-y-auto">
-                    <div class="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
-                        <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enter-to="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leave-from="opacity-100 translate-y-0 sm:scale-100" leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                            <DialogPanel class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full sm:p-6">
-                                <div class="sm:flex sm:items-start">
-                                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <ExclamationIcon class="h-6 w-6 text-red-600" aria-hidden="true" />
-                                    </div>
-                                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                        <DialogTitle as="h3" class="text-lg leading-6 font-medium text-gray-900"> Declare Winner </DialogTitle>
-                                        <div class="mt-2">
-                                            <p class="text-sm text-gray-500">Are you sure you want to declare <span class="text-red-400">{{ submissions.find(x => x.id === pickedSubmission).submission ?? '' }}</span> the winner? This action cannot be undone.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                                    <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:ml-3 sm:w-auto sm:text-sm" @click="submitWinner()" :disabled="awaitingTxResponse">Declare Winner</button>
-                                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm" @click="open = false" ref="cancelButtonRef" :disabled="awaitingTxResponse">Cancel</button>
-                                </div>
-                            </DialogPanel>
-                        </TransitionChild>
-                    </div>
-                </div>
-            </Dialog>
-        </TransitionRoot>
     </BreezeAuthenticatedLayout>
+
+    <Modal
+        color="red"
+        confirm-label="Confirm Winner"
+        :open="confirmOpened"
+        @close="confirmOpened = false"
+        @confirmed="submitWinner"
+    >
+        <template #title>
+            Confirm Winner
+        </template>
+        <template #message>
+            Are you sure you want to declare <span class="text-red-400">{{ submissions.find(x => x.id === pickedSubmission).submission ?? '' }}</span> the winner? This action cannot be undone.
+        </template>
+    </Modal>
+
+    <Modal
+        color="red"
+        confirm-label="Claim Bounty"
+        :open="claimOpened"
+        @close="claimOpened = false"
+        @confirmed="claimBounty"
+    >
+        <template #title>
+            Claim Bounty
+        </template>
+        <template #message>
+            Claim <span class="text-red-400">{{ formatEther(this.bounty.value) }} ETH</span> ?
+        </template>
+    </Modal>
 </template>
 
 <script>
@@ -124,6 +122,7 @@ import {ethers} from 'ethers';
 import { useForm } from '@inertiajs/inertia-vue3';
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { ExclamationIcon } from '@heroicons/vue/outline'
+import Modal from "@/Components/Modal";
 
 import Abi from "@/artifacts/hardhat/contracts/Namespace.sol/Namespace.json";
 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -140,7 +139,8 @@ export default {
         BreezeAuthenticatedLayout, BreezeButton, BreezeInput, BreezeLabel, BreezeValidationErrors,
         BountyGrid,
         DocumentTextIcon, StarIcon, ExclamationIcon,
-        Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot
+        Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot,
+        Modal
     },
     props: {
         bounty: {type: Object, default: () => {}},
@@ -152,7 +152,8 @@ export default {
             form: useForm({
                 submission: ''
             }),
-            open: false,
+            confirmOpened: false,
+            claimOpened: false,
             pickedSubmission: null,
             awaitingTxResponse: false,
         }
@@ -184,7 +185,7 @@ export default {
         },
         declareWinner(submission) {
             this.pickedSubmission = submission;
-            this.open = true;
+            this.confirmOpened = true;
         },
         async submitWinner() {
             this.awaitingTxResponse = true;
@@ -199,13 +200,12 @@ export default {
             } catch (err) {
                 console.log(err);
             }
-            this.open = false;
+            this.confirmOpened = false;
             this.awaitingTxResponse = false;
         },
         async claimBounty() {
             console.log('claiming bounty');
             this.awaitingTxResponse = true;
-
             try {
                 const address = await provider.getSigner().getAddress();
                 const tx = await contract.withdrawPayments(address);
@@ -217,7 +217,7 @@ export default {
             }
 
             this.awaitingTxResponse = false;
-
+            this.claimOpened = false;
         }
     }
 }

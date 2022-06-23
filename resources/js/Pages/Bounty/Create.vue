@@ -3,7 +3,7 @@
     <BreezeAuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                New Bounty
+                Create Bounty
             </h2>
         </template>
 
@@ -13,7 +13,7 @@
                     <div class="p-6 bg-white border-b border-gray-200">
                         <BreezeValidationErrors class="mb-4"/>
 
-                        <form @submit.prevent="submit">
+                        <form @submit.prevent="confirmOpened = true">
                             <div>
                                 <BreezeLabel for="value" value="Bounty Amount in ETH"/>
                                 <BreezeInput id="value" type="text" class="mt-1 block w-full" v-model="value"
@@ -55,6 +55,21 @@
             </div>
         </div>
     </BreezeAuthenticatedLayout>
+
+    <Modal
+        color="red"
+        confirm-label="Create Bounty"
+        :open="confirmOpened"
+        @close="confirmOpened = false"
+        @confirmed="createBounty"
+    >
+        <template #title>
+            Create Bounty
+        </template>
+        <template #message>
+            Are you sure you want to create a bounty for <span class="text-red-400">{{ this.value }} ETH</span> ? This action cannot be undone.
+        </template>
+    </Modal>
 </template>
 
 <script>
@@ -65,6 +80,7 @@ import BreezeLabel from '@/Components/Label.vue';
 import BreezeValidationErrors from '@/Components/ValidationErrors.vue';
 import {Head, Link, useForm} from '@inertiajs/inertia-vue3';
 import { ethers } from 'ethers';
+import Modal from "@/Components/Modal";
 
 import Abi from '@/artifacts/hardhat/contracts/Namespace.sol/Namespace.json';
 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -84,6 +100,7 @@ export default {
         BreezeValidationErrors,
         Head,
         Link,
+        Modal
     },
     data() {
         return {
@@ -91,10 +108,11 @@ export default {
             deadline: 30,
             description: 'Test Description',
             isLoading: false,
+            confirmOpened: false
         }
     },
     methods: {
-        async submit() {
+        async createBounty() {
             this.isLoading = true;
             try {
                 //todo validate params
@@ -121,7 +139,7 @@ export default {
                 console.log(err);
             }
             this.isLoading = false;
-
+            this.confirmOpened = false;
             // console.log(await this.provider.getBalance(await this.provider.getSigner().getAddress()));
             // const ethereum = await detectEthereumProvider();
             // const provider = new ethers.providers.Web3Provider(ethereum);
